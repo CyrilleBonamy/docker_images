@@ -45,20 +45,58 @@ RUN mkdir -p /opt/openfoam/2506 && wget -O /opt/openfoam/2506/OFzip https://dl.o
 RUN cd /opt/openfoam/2506/OpenFOAM-v2506 && \
     /bin/bash -c "source etc/bashrc; ./Allwmake -j 8"
 
-#RUN cd /opt/openfoam/2506/ThirdParty-v2506 && \
-#    /bin/bash -c "source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc && wmRefresh" && \
-#    rm -rf /opt/openfoam/2506/ThirdParty-v2506/build && \
-#    /bin/bash -c "find /opt/openfoam -name \"*.o\" -exec rm -f {} \;" && \
-#    /bin/bash -c "find /opt/openfoam -name \".git*\" -exec rm -rf {} \;" && \
-#    /bin/bash -c "find /opt/openfoam -name \".svn*\" -exec rm -rf {} \;"
-#    sync
+RUN rm -rf /opt/openfoam/2506/ThirdParty-v2506/build && \
+    find /opt/openfoam -name \"*.o\" -exec rm -f {} \; && \
+    find /opt/openfoam -name \".git*\" -exec rm -rf {} \; && \
+    find /opt/openfoam -name \".svn*\" -exec rm -rf {} \;
 
-RUN echo "source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc" >> ${HOME}/.bashrc && \
-    sync
+
+RUN update-ca-certificates && apt-get update \
+  && apt-get install --no-install-recommends -y \
+  python-is-python3 ipython3 python3-tk \
+  unzip git mercurial libreadline-dev vim nano emacs python3-venv \
+  #cm-super meld \
+  #texlive dvipng texlive-latex-extra python3-netcdf4 python3-pandas \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 
 #create user openfoam and set environment directories
 RUN useradd -ms /bin/bash openfoam
 WORKDIR /home/openfoam
+
+
+RUN python3 -m venv /home/openfoam/pyenv
+
+RUN /bin/bash -c 'shopt -s expand_aliases && source /home/openfoam/pyenv/bin/activate && pip3 install --no-cache-dir fluidfoam pandas matplotlib odfpy black'
+
+WORKDIR /root/
+RUN git clone --branch develop --recurse-submodules https://github.com/sedfoam/sedfoam.git --depth 1
+
+WORKDIR /root
+RUN /bin/bash -c 'hg clone http://hg.code.sf.net/p/openfoam-extend/swak4Foam -b develop && cp sedfoam/docker/Allwmakeswak swak4Foam/Libraries/Allwmake'
+
+WORKDIR /root/swak4Foam
+RUN /bin/bash -c 'shopt -s expand_aliases && ./maintainanceScripts/compileRequirements.sh'
+
+WORKDIR /root/swak4Foam
+RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && export FOAM_USER_APPBIN=$FOAM_SITE_APPBIN && export SWAK_COMPILE_GRAMMAR_OPTION=-O1 && export WM_NCOMPPROCS=1 && ./Allwmake'
+
+WORKDIR /root/sedfoam
+RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && ./Allwmake -prefix=group'
+
+##USER 1001
+
+##WORKDIR /home/sudofoam
+##RUN sudo cp -r /root/sedfoam sedfoam && sudo chown -R sudofoam: /home/sudofoam && sudo rm -rf /root/*
+RUN echo "source /home/openfoam/pyenv/bin/activate" >> .bashrc
+
+
+
+
+RUN echo "source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc" >> ${HOME}/.bashrc && \
+    sync
+
 #USER openfoam:openfoam
 # Set the default entry point & arguments
 ENTRYPOINT ["/bin/bash"]
