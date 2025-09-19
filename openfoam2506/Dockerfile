@@ -87,8 +87,9 @@ RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2506/OpenFOAM-
 
 ##USER 1001
 
-##WORKDIR /home/sudofoam
-##RUN sudo cp -r /root/sedfoam sedfoam && sudo chown -R sudofoam: /home/sudofoam && sudo rm -rf /root/*
+WORKDIR /home/openfoam
+RUN cp -r /root/sedfoam sedfoam && chown -R openfoam: /home/openfoam && rm -rf /root/*
+USER openfoam:openfoam
 RUN echo "source /home/openfoam/pyenv/bin/activate" >> .bashrc
 
 
@@ -97,7 +98,6 @@ RUN echo "source /home/openfoam/pyenv/bin/activate" >> .bashrc
 RUN echo "source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc" >> ${HOME}/.bashrc && \
     sync
 
-#USER openfoam:openfoam
 # Set the default entry point & arguments
 ENTRYPOINT ["/bin/bash"]
 
