@@ -11,26 +11,16 @@ RUN apt-get update --fix-missing && \
     apt-get -y dist-upgrade && \
     apt-get install -y --no-install-recommends \
         wget mesa-utils libgl1-mesa-dri \
-        time freeglut3-dev meld ca-certificates libreadline-dev && \
-    rm -rf /var/lib/apt/lists/ && rm -rf /usr/share/doc/ && \
-    rm -rf /usr/share/man/ && rm -rf /usr/share/locale/ && \
-    apt-get clean
-RUN apt-get update --fix-missing && \
-    apt-get -y dist-upgrade && \
-    apt-get install -y --no-install-recommends \
-        libglapi-mesa libgd-tools imagemagick graphicsmagick mplayer mencoder && \
-    rm -rf /var/lib/apt/lists/ && rm -rf /usr/share/doc/ && \
-    rm -rf /usr/share/man/ && rm -rf /usr/share/locale/ && \
-    apt-get clean
-RUN apt-get update --fix-missing && \
-    apt-get -y dist-upgrade && \
-    apt-get install -y --no-install-recommends \
+        time freeglut3-dev meld ca-certificates libreadline-dev \
+        libglapi-mesa libgd-tools imagemagick graphicsmagick mplayer mencoder \
         mjpegtools emacs gedit gedit-plugins gnuplot gnuplot-x11 \
         gnuplot-doc bash-completion bash-builtins libnss-wrapper vim nano tree \
         python3 python3-dev python3-pip python3-numpy \
         openmpi-bin libopenmpi-dev make flex gcc g++ libz-dev libfl-dev \
         curl bash-completion cmake libxt-dev \
-        qttools5-dev libqt5x11extras5-dev qtbase5-dev libqt5opengl5-dev libqt5sql5-sqlite && \
+        qttools5-dev libqt5x11extras5-dev qtbase5-dev libqt5opengl5-dev libqt5sql5-sqlite \
+        python-is-python3 ipython3 python3-tk \
+        unzip git mercurial libreadline-dev vim nano emacs python3-venv && \
     rm -rf /var/lib/apt/lists/ && rm -rf /usr/share/doc/ && \
     rm -rf /usr/share/man/ && rm -rf /usr/share/locale/ && \
     apt-get clean
@@ -50,24 +40,11 @@ RUN rm -rf /opt/openfoam/2506/ThirdParty-v2506/build && \
     find /opt/openfoam -name \".git*\" -exec rm -rf {} \; && \
     find /opt/openfoam -name \".svn*\" -exec rm -rf {} \;
 
-
-RUN update-ca-certificates && apt-get update \
-  && apt-get install --no-install-recommends -y \
-  python-is-python3 ipython3 python3-tk \
-  unzip git mercurial libreadline-dev vim nano emacs python3-venv \
-  #cm-super meld \
-  #texlive dvipng texlive-latex-extra python3-netcdf4 python3-pandas \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-
 #create user openfoam and set environment directories
 RUN useradd -ms /bin/bash openfoam
 WORKDIR /home/openfoam
 
-
 RUN python3 -m venv /home/openfoam/pyenv
-
 RUN /bin/bash -c 'shopt -s expand_aliases && source /home/openfoam/pyenv/bin/activate && pip3 install --no-cache-dir fluidfoam pandas matplotlib odfpy black'
 
 WORKDIR /root/
@@ -75,25 +52,17 @@ RUN git clone --branch develop --recurse-submodules https://github.com/sedfoam/s
 
 WORKDIR /root
 RUN /bin/bash -c 'hg clone http://hg.code.sf.net/p/openfoam-extend/swak4Foam -b develop && cp sedfoam/docker/Allwmakeswak swak4Foam/Libraries/Allwmake'
-
 WORKDIR /root/swak4Foam
 RUN /bin/bash -c 'shopt -s expand_aliases && ./maintainanceScripts/compileRequirements.sh'
-
-WORKDIR /root/swak4Foam
 RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && export FOAM_USER_APPBIN=$FOAM_SITE_APPBIN && export SWAK_COMPILE_GRAMMAR_OPTION=-O1 && export WM_NCOMPPROCS=1 && ./Allwmake'
 
 WORKDIR /root/sedfoam
 RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && ./Allwmake -prefix=group'
 
-##USER 1001
-
 WORKDIR /home/openfoam
 RUN cp -r /root/sedfoam sedfoam && chown -R openfoam: /home/openfoam && rm -rf /root/*
 USER openfoam:openfoam
 RUN echo "source /home/openfoam/pyenv/bin/activate" >> .bashrc
-
-
-
 
 RUN echo "source /opt/openfoam/2506/OpenFOAM-v2506/etc/bashrc" >> ${HOME}/.bashrc && \
     sync
