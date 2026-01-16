@@ -10,7 +10,7 @@ jobs:
   docker:
     runs-on: ${{ matrix.os }}  
     env:
-      REGISTRY_IMAGE: cbonamy/of2506_4_kraken
+      REGISTRY_IMAGE: cbonamy/of2512_4_kraken
     strategy:
       fail-fast: false
       matrix:
@@ -50,8 +50,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          context: openfoam2506
-          file: openfoam2506/Dockerfile
+          context: openfoam2512
+          file: openfoam2512/Dockerfile
           #tags: ${{ env.REGISTRY_IMAGE }}
 
       - name: Export digest
@@ -71,7 +71,7 @@ jobs:
   merge:
     runs-on: ubuntu-24.04
     env:
-      REGISTRY_IMAGE: cbonamy/of2506_4_kraken
+      REGISTRY_IMAGE: cbonamy/of2512_4_kraken
     needs:
       - docker
     steps:
