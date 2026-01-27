@@ -50,12 +50,11 @@ RUN /bin/bash -c 'shopt -s expand_aliases && source /home/openfoam/pyenv/bin/act
 WORKDIR /root/
 RUN git clone --branch develop --recurse-submodules https://github.com/sedfoam/sedfoam.git --depth 1
 
-#NOT AVAILABLE CURRENTLY
-#WORKDIR /root
-#RUN /bin/bash -c 'hg clone http://hg.code.sf.net/p/openfoam-extend/swak4Foam -b develop && cp sedfoam/docker/Allwmakeswak swak4Foam/Libraries/Allwmake'
-#WORKDIR /root/swak4Foam
-#RUN /bin/bash -c 'shopt -s expand_aliases && ./maintainanceScripts/compileRequirements.sh'
-#RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2512/OpenFOAM-v2512/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && export FOAM_USER_APPBIN=$FOAM_SITE_APPBIN && export SWAK_COMPILE_GRAMMAR_OPTION=-O1 && export WM_NCOMPPROCS=1 && ./Allwmake'
+WORKDIR /root
+RUN /bin/bash -c 'hg clone http://hg.code.sf.net/p/openfoam-extend/swak4Foam -b develop && cp sedfoam/docker/Allwmakeswak swak4Foam/Libraries/Allwmake'
+WORKDIR /root/swak4Foam
+RUN /bin/bash -c 'shopt -s expand_aliases && ./maintainanceScripts/compileRequirements.sh'
+RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2512/OpenFOAM-v2512/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && export FOAM_USER_APPBIN=$FOAM_SITE_APPBIN && export SWAK_COMPILE_GRAMMAR_OPTION=-O1 && export WM_NCOMPPROCS=1 && ./Allwmake'
 
 WORKDIR /root/sedfoam
 RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2512/OpenFOAM-v2512/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && ./Allwmake -prefix=group'
