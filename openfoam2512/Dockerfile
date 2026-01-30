@@ -1,4 +1,4 @@
-FROM debian:13.1
+FROM debian:13.3
 LABEL maintainer "cyrille.bonamy@legi.cnrs.fr"
 # Ensure a sane environment
 ENV LANG=C.UTF-8 \
@@ -8,6 +8,7 @@ ENV LANG=C.UTF-8 \
 
 # Update the image & install some tools
 RUN apt-get update --fix-missing && \
+    apt-get -y dist-upgrade && \
     apt-get -y dist-upgrade && \
     apt-get install -y --no-install-recommends \
         wget mesa-utils libgl1-mesa-dri \
