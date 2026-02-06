@@ -9,7 +9,6 @@ ENV LANG=C.UTF-8 \
 # Update the image & install some tools
 RUN apt-get update --fix-missing && \
     apt-get -y dist-upgrade && \
-    apt-get -y dist-upgrade && \
     apt-get install -y --no-install-recommends \
         wget mesa-utils libgl1-mesa-dri \
         time freeglut3-dev meld ca-certificates libreadline-dev \
