@@ -52,7 +52,7 @@ RUN git clone --branch develop --recurse-submodules https://github.com/CyrilleBo
 
 WORKDIR /root
 RUN /bin/bash -c 'hg clone http://hg.code.sf.net/p/openfoam-extend/swak4Foam -b develop && cp sedfoam/docker/Allwmakeswak swak4Foam/Libraries/Allwmake'
-RUN /bin/bash -c './sedfoam/docker/fix_swak4foam_openfoam2606.sh swak4Foam/'
+RUN /bin/bash -c '/bin/bash sedfoam/docker/fixswak2606.sh swak4Foam/'
 WORKDIR /root/swak4Foam
 RUN /bin/bash -c 'shopt -s expand_aliases && ./maintainanceScripts/compileRequirements.sh'
 RUN /bin/bash -c 'shopt -s expand_aliases && source /opt/openfoam/2606/OpenFOAM-v2606/etc/bashrc && export FOAM_USER_LIBBIN=$FOAM_SITE_LIBBIN && export FOAM_USER_APPBIN=$FOAM_SITE_APPBIN && export SWAK_COMPILE_GRAMMAR_OPTION=-O1 && export WM_NCOMPPROCS=1 && ./Allwmake' || true
